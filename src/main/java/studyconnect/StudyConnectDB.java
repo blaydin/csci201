@@ -79,10 +79,72 @@ public class StudyConnectDB {
 		return user;
 	}
 	
-	// TO-DO 
+	
 	// Retrieves study group information from the StudyGroups table from the database and creates a User object if a user with that email exists, otherwise returns null
-	public static User getStudyGroup(int studyGroupID) {
-		return null;
+	public static StudyGroups getStudyGroup(int studyGroupID) {
+		String query = "SELECT * FROM StudyGroups WHERE StudyGroups.studyGroupID = \"" + studyGroupID + "\"";
+		Connection conn = createConnection();
+		ResultSet rs = executeQuery(conn, query);
+		
+		// If null, no ResultSet due to error
+		if (rs == null) {
+			return null;
+		}
+		
+		StudyGroups studyGroup = null;
+		
+		try {
+			if (rs.next()) {
+				// Study group with that studyGroupID is found
+				studyGroup = new StudyGroups();
+				studyGroup.setHostID((rs.getInt("hostID")));
+				studyGroup.setLocation(rs.getString("location"));
+				studyGroup.setTime(rs.getString("time"));
+				studyGroup.setDay(rs.getString("day"));
+			}
+			
+			if (rs != null) {
+				rs.close();
+			}
+			if (conn != null) {
+				conn.close();
+			}
+		} catch (Exception ex) {
+			System.out.println ("Exception: " + ex.getMessage());
+		}
+		
+		return studyGroup;
+	}
+	
+	// Adds a user to a study group in the StudyGroup database table
+	public static boolean addUserToStudyGroup(int studyGroupID, int userID) {
+		String query = "INSERT INTO StudyGroup (studyGroupID, userID) VALUES (\"" + studyGroupID + "\", \"" + userID + "\")";
+		System.out.println("executing query: " + query);
+		Connection conn = createConnection();
+		boolean res = executeUpdate(conn, query); // Returns true if successfully added, false otherwise
+
+		try {
+	 	 conn.close();
+   	    } catch (Exception ex) {
+   	    	
+		}
+		
+		return res;
+	}
+	
+	// Adds a course that a user is taking to the Course database table
+	public static boolean addUsersCourses(int courseID, int userID) {
+		String query = "INSERT INTO Course (courseID, userID) VALUES (\"" + courseID + "\", \"" + userID + "\")";
+		System.out.println("executing query: " + query);
+		Connection conn = createConnection();
+		boolean res = executeUpdate(conn, query); // Returns true if successfully added, false otherwise
+		
+		try {
+	 	 conn.close();
+   	    } catch (Exception ex) {
+   	    	
+		}
+		return res;
 	}
 	
 	// Inserts a given user into the Users table in the database and returns true if successful, otherwise false
@@ -149,8 +211,7 @@ public class StudyConnectDB {
 	public static Connection createConnection() {
 		Connection conn = null;
 		try {
-			// EDIT THIS: 
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/studyconnect?user=root&password=");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost/studyconnect?user=root&password=danMeowMeow_18");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
